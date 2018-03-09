@@ -1,11 +1,12 @@
 import json
 import boto3
+from logging import Logger
 from typing import Dict, List, Any
 from tempfile import TemporaryFile
 
 
 class AWSHelper:
-    def __init__(self, logger=None) -> None:
+    def __init__(self, *, logger: Logger) -> None:
         self.sns = boto3.client("sns")
         self.sqs = boto3.client("sqs")
         self.s3 = boto3.client("s3")
@@ -41,8 +42,11 @@ class AWSHelper:
                                             AttributeNames=["All"],
                                             MessageAttributeNames=["All"],
                                             WaitTimeSeconds=timeout)
-        cleaned_messages = [{**msg, 'ResponseMetadata': messages['ResponseMetadata']}
-                            for msg in messages['Messages']]
+        if "Messages" in messages:
+            cleaned_messages = [{**msg, 'ResponseMetadata': messages['ResponseMetadata']}
+                                for msg in messages['Messages']]
+        else:
+            cleaned_messages = []
         return cleaned_messages
 
     def load_data_dump_to_dict_object(self, *, s3_bucket: str, file_key: str) -> Dict[str, Any]:
