@@ -1,5 +1,6 @@
 import json
 import boto3
+
 from logging import Logger
 from typing import Dict, List, Any
 from tempfile import TemporaryFile
@@ -50,16 +51,12 @@ class AWSHelper:
         return cleaned_messages
 
     def load_data_dump_to_dict_object(self, *, s3_bucket: str, file_key: str) -> Dict[str, Any]:
-        with TemporaryFile("wb") as data_dump:
-            self.s3.download_fileobj(s3_bucket,
-                                     file_key,
-                                     data_dump)
-            binary_content = data_dump.read()
-            json_data = json.loads(binary_content, encoding="utf-8")
+        file_obj = self.s3.get_object(Bucket=s3_bucket, Key=file_key)
+        json_data = json.loads(file_obj['Body'].read())
         return json_data
 
-    def upload_json_to_s3_bucket(self, *, bucket_name: str, upload_name: str, data: Dict):
-        temp_file = TemporaryFile("wb")
-        temp_file.write(bytes(json.dumps(data)))
-        self.s3.upload_fileobj(temp_file, bucket_name, upload_name)
-
+    def upload_json_to_s3_bucket(self, *, s3_bucket: str, file_key: str, data: Dict):
+        self.s3.put_object(Body=bytes(json.dumps(data), encoding="utf-8"),
+                      Bucket=s3_bucket, Key=file_key)
+        self.logger.debug(f"Uploaded data to S3 with name: {file_key}")
+        return file_key
