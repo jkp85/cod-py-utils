@@ -15,7 +15,7 @@ $ source venv/bin/activate
 ```
 3. Once activated, install `cod-py-utils` from its GitHub URL (not currently on PyPi):
 ```
-<venv>$ pip install git+https://github.com/cupofdata/py-service-utils.git
+<venv>$ pip install git+https://github.com/cupofdata/cod-py-utils.git
 ```
 4. Once installed, call the library using a normal Python import statement:
 ```
