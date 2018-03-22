@@ -44,7 +44,7 @@ class AWSHelper:
 
     def get_queue_messages(self, *,
                            queue_url: str,
-                           timeout: int = 20) -> List[Dict[str, Any]]:
+                           timeout: int=20) -> List[Dict[str, Any]]:
         """
         Pull messages from an AWS SQS queue
         :param queue_url: URL of the AWS SQS queue
