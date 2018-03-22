@@ -17,7 +17,11 @@ $ source venv/bin/activate
 ```
 <venv>$ pip install git+https://github.com/cupofdata/cod-py-utils.git
 ```
-4. Once installed, call the library using a normal Python import statement:
+4. [Recommended] After installation, include the library in `requirements.txt`:
+```
+<venv>$ pip freeze > requirements.txt
+```
+5. Once installed, call the library using a normal Python import statement:
 ```
 from cod_services.aws_utils import AWSHelper
 ```
