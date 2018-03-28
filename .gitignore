@@ -1,7 +1,9 @@
-# JetBrains
+# IDE
 .idea/
 __pycache__
 *.pyc
+.vscode/
 
 # virtualenv
 venv/
+

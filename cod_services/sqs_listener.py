@@ -5,13 +5,15 @@ import time
 import logging
 import os
 import sys
+
+from typing import Dict
 from abc import ABCMeta, abstractmethod
 
 
 class SqsListener(object):
     __metaclass__ = ABCMeta
 
-    def __init__(self, queue, **kwargs):
+    def __init__(self, queue: str, **kwargs: Dict) -> None:
         """
         :param queue: (str) name of queue to listen to
         :param kwargs: error_topic=None, interval=0, wait_time=20, force_delete=False
@@ -32,7 +34,7 @@ class SqsListener(object):
         self._failed_messages = {}
         self._client = self._initialize_client()
 
-    def _initialize_client(self):
+    def _initialize_client(self) -> None:
         # new session for each instantiation
         self._session = boto3.session.Session()
         sqs = self._session.client('sqs')
@@ -57,7 +59,7 @@ class SqsListener(object):
 
         return sqs
 
-    def _start_listening(self):
+    def _start_listening(self) -> None:
         while True:
             messages = self._client.receive_message(
                 QueueUrl=self._queue_url,
@@ -95,7 +97,9 @@ class SqsListener(object):
             else:
                 time.sleep(self._poll_interval)
 
-    def process_error(self, m_id, receipt_handle, body, attributes, message_attributes, error):
+    def process_error(self, m_id: str, receipt_handle: Dict, body: Dict,
+                      attributes: Dict, message_attributes: Dict,
+                      error: Exception) -> None:
         self.handle_error(body, attributes, message_attributes, error)
 
         if not self._failed_messages.get(m_id, None):
@@ -127,7 +131,7 @@ class SqsListener(object):
                                f"Max retries: {self._max_retries}")
             self._failed_messages[m_id] += 1
 
-    def listen(self):
+    def listen(self) -> None:
         self._logger.info("Listening to queue " + self._queue_name)
         if self._error_topic_arn:
             self._logger.info("Using error topic " + self._error_topic_arn)
@@ -135,7 +139,7 @@ class SqsListener(object):
         self._start_listening()
 
     @abstractmethod
-    def handle_message(self, body, attributes, messages_attributes):
+    def handle_message(self, body: Dict, attributes: Dict, messages_attributes: Dict):
         """
         Implement this method to do something with the SQS message contents
         :param body: dict
@@ -146,7 +150,7 @@ class SqsListener(object):
         return
 
     @abstractmethod
-    def handle_error(self, body, attributes, messages_attributes, error):
+    def handle_error(self, body: Dict, attributes: Dict, messages_attributes: Dict, error: Exception):
         """
         Implement this method to handle when a message has an error
         :param body: dict
@@ -158,7 +162,7 @@ class SqsListener(object):
         return
 
     @abstractmethod
-    def handle_failed_message(self, body, attributes, messages_attributes, error):
+    def handle_failed_message(self, body: Dict, attributes: Dict, messages_attributes: Dict, error: Exception):
         """
         Implement this method to handle when a message max retries are exceeded
         :param body: dict
