@@ -7,11 +7,10 @@ import os
 import sys
 
 from typing import Dict
-from abc import ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
 
 
-class SqsListener(object):
-    __metaclass__ = ABCMeta
+class SqsListener(ABC):
 
     def __init__(self, queue: str, **kwargs: Dict) -> None:
         """
