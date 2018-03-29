@@ -75,20 +75,14 @@ class SqsListener(ABC):
                     message_attribs = m.get('MessageAttributes', {})
                     attribs = m.get('Attributes', {})
 
-                    # catch problems with malformed JSON, usually a result of someone writing poor JSON directly in the AWS console
                     try:
                         params_dict = json.loads(m_body)
-                    except:
-                        self._logger.warning(
-                            "Unable to parse message - JSON is not formatted properly")
-                        continue
-                    try:
                         self.handle_message(params_dict, attribs, message_attribs)
                         self._client.delete_message(
                             QueueUrl=self._queue_url,
                             ReceiptHandle=receipt_handle
                         )
-                        self._failed_messages.pop(m_id)
+                        self._failed_messages.pop(m_id, None)
                     except Exception as ex:
                         self.process_error(m_id, receipt_handle, params_dict,
                                            attribs, message_attribs, ex)
