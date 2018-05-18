@@ -7,10 +7,10 @@ from typing import Dict, List, Any
 
 class AWSHelper:
 
-    def __init__(self, *, logger: Logger) -> None:
-        self.sns = boto3.client("sns")
-        self.sqs = boto3.client("sqs")
-        self.s3 = boto3.client("s3")
+    def __init__(self, *, logger: Logger, sns_client=None, sqs_client=None, s3_client=None) -> None:
+        self.sns = sns_client or boto3.client("sns")
+        self.sqs = sqs_client or boto3.client("sqs")
+        self.s3 = s3_client or boto3.client("s3")
         self.logger = logger
 
     def publish_to_sns_topic(self,
@@ -41,6 +41,7 @@ class AWSHelper:
         )
 
         self.logger.debug(f"Publish to SNS Response: {response}")
+        return response
 
     def get_queue_messages(self, *,
                            queue_url: str,
@@ -50,7 +51,7 @@ class AWSHelper:
         :param queue_url: URL of the AWS SQS queue
         :param timeout: How long to wait for a message to come across the queue. From 0 - 20.
         :return: A dict, with a single key 'Messages', that maps to a list of dicts where
-                 each element defines an message. 
+                 each element defines an message.
         """
         # TODO: Decide how many messages to receive
         messages = self.sqs.receive_message(
@@ -77,7 +78,7 @@ class AWSHelper:
         :return: A dict, JSON object of the S3 Bucket contents
         """
         file_obj = self.s3.get_object(Bucket=s3_bucket, Key=file_key)
-        json_data = json.loads(file_obj['Body'].read())
+        json_data = json.load(file_obj['Body'])
         return json_data
 
     def upload_json_to_s3_bucket(self, *,
